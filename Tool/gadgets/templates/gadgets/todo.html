@@ -1,0 +1,76 @@
+{%extends "gadgets/base.html"%}
+{% load crispy_forms_tags %}
+
+{% block content%}
+  <!-- Page Content -->
+  <h1>Todos</h1>
+  <hr/>
+  <div id="cards">
+    {% for todo in todos%}
+      <div class = "card mt-3">
+        <div class = "card-body mb-n3">
+          <div class = "row">
+            <div class = "col-sm">
+              <div class="form-check form-check-inline">
+                {% if todo.checked is False %}
+                  <input class="form-check-input" type="checkbox" name="Check" id="check1" value="option1" unchecked>
+                {% else %}
+                  <input class="form-check-input" type="checkbox" name="Check" id="check1" value="option1" checked>
+                {% endif %}
+                <label class="form-check-label" for="Todo">
+                  {{todo.content}}
+                </label>
+              </div>
+              <p class = "text-muted">{{todo.time}}</p>
+            </div>
+            <div class = "col-sm mt-2">
+              <form action="{% url 'todo_delete' todo.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-danger float-right" type="submit">
+                  Trash
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <form class="mt-3" method="post" id="update">
+    {% csrf_token %}
+    <div class="form-row">
+      <div class="col-10">
+        {{form.content}}
+      </div>
+      <div class="col">
+        <button type="submit" class="btn btn-primary btn-sm">
+          &nbsp&nbsp&nbsp&nbsp&nbspUpdate&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+        </button>
+      </div>
+    </div>
+  </form>
+  <script>
+    $(document).ready(function(){
+     $("#update").submit(function(e){
+      	e.preventDefault();
+      	var serializedData = $(this).serialize();
+      	$.ajax({
+      		type : 'POST',
+      		url :  "{% url 'gadgets-todo' %}",
+      		data : serializedData,
+      		success : function(response){
+      			$("#update")[0].reset();
+            $("#cards").append("<div class = \"card mt-3\">\n        <div class = \"card-body mb-n3\">\n          <div class = \"row\">\n            <div class = \"col-sm\">\n              <div class=\"form-check form-check-inline\">\n                  <input class=\"form-check-input\" type=\"checkbox\" name=\"Check\" id=\"check1\" value=\"option1\" unchecked>\n                <label class=\"form-check-label\" for=\"Todo\">\n                  "+response.content+"\n                </label>\n              </div>\n              <p class = \"text-muted\">"+response.time+"</p>\n            </div>\n            <div class = \"col-sm mt-2\">\n              <form>\n                <button class=\"btn btn-danger float-right\" type=\"submit\">\n                  Trash\n                </button>\n              </form>\n            </div>\n          </div>\n        </div>\n      </div>")
+            console.log(response.content);
+      		},
+      		error : function(response){
+      			console.log(response);
+      		}
+      	});
+     });
+});
+</script>
+	<!--put {{data.variablename}} in order to get vars-->
+	<!--put {% for datas in data %}-->
+	<!--make sure to put {% endfor %} in order to end for loops and other stuff-->
+{% endblock content %}
